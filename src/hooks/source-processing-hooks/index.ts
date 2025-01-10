@@ -3,7 +3,6 @@ import { summarizeSourceAction } from "@/actions/sources/summarize-source-action
 import { SourceProcessingStatus } from "@/db/schema/sources";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
-import { toast } from "sonner";
 
 export const usePollForParsingJobStatus = ({
   jobId,
@@ -20,8 +19,6 @@ export const usePollForParsingJobStatus = ({
 }) => {
   const { execute: pollJobStatus } = useAction(pollJobStatusAction, {
     onSuccess: ({ data }) =>
-      data?.status === "SUCCESS" &&
-      toast.success(`${sourceName} parsed successfully`),
   });
 
   useEffect(() => {
@@ -54,7 +51,6 @@ export const useSummarizeSource = ({
   sourceName: string;
 }) => {
   const { execute: summarizeSource } = useAction(summarizeSourceAction, {
-    onSuccess: () => toast.success(`${sourceName} summarized successfully`),
   });
 
   useEffect(() => {

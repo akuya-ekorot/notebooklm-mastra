@@ -23,21 +23,38 @@ export const fetchNavbarName = async (notebookId: string) => {
 };
 
 export type NotebookSummary = Awaited<
-  ReturnType<typeof fetchNotebookSummaries>
->[number];
+  ReturnType<typeof fetchNotebookWithSources>
+>;
 
-export const fetchNotebookSummaries = async (notebookId: string) => {
+export const fetchNotebookWithSources = async (notebookId: string) => {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
 
-  return await db
-    .select({
-      id: notebooks.id,
-      emoji: notebooks.emoji,
-      title: notebooks.title,
-      summary: notebooks.summary,
-    })
-    .from(notebooks)
-    .where(and(eq(notebooks.id, notebookId), eq(notebooks.userId, userId)))
-    .limit(1);
+  return await db.query.notebooks.findFirst({
+    where: (t, h) => h.eq(t.id, notebookId),
+    columns: {
+      id: true,
+      name: true,
+      emoji: true,
+      title: true,
+      summary: true,
+      notebookStatus: true,
+      podcastStatus: true,
+    },
+    with: {
+      sources: {
+        with: {
+          sourceSummaries: true,
+          sourceTopics: true,
+          sourceChunks: true,
+          parsingJobs: true,
+        },
+      },
+      notebookPodcast: {
+        columns: {
+          audioUrl: true,
+        },
+      },
+    },
+  });
 };

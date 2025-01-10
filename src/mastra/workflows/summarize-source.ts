@@ -122,8 +122,7 @@ export const summarizeSource = new Workflow({
         await db
           .update(sources)
           .set({ processingStatus: "summarized" })
-          .where(eq(sources.id, c.sourceId))
-          .execute();
+          .where(eq(sources.id, c.sourceId));
 
         return {
           summary,

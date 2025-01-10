@@ -57,24 +57,23 @@ export const submitSourcesForParsing = actionClient
       notebookId = parsedInput.notebookId;
     }
 
-    ctx.db
-      .insert(sources)
-      .values(
-        jobs.map((j) => ({ name: j.fileName, notebookId, id: j.sourceId })),
-      )
-      .execute();
+    await ctx.db.insert(sources).values(
+      jobs.map((j) => ({
+        name: j.fileName,
+        notebookId,
+        id: j.sourceId,
+        processingStatus: "queued" as const,
+      })),
+    );
 
-    ctx.db
-      .insert(parsingJobs)
-      .values(
-        jobs.map((j) => ({
-          sourceId: j.sourceId,
-          status: j.status,
-          jobId: j.jobId,
-        })),
-      )
-      .execute();
+    await ctx.db.insert(parsingJobs).values(
+      jobs.map((j) => ({
+        sourceId: j.sourceId,
+        status: j.status,
+        jobId: j.jobId,
+      })),
+    );
 
     if (!parsedInput.sidebar) redirect(`/notebook/${notebookId}`);
-    else revalidatePath(`/notebook/${notebookId}`);
+    else revalidatePath(`/notebook/${notebookId}`, "layout");
   });

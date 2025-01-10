@@ -4,6 +4,7 @@ import { z } from "zod";
 import { actionClient } from "./safe-action";
 import { notebookPodcast } from "@/db/schema/notebooks";
 import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
 export const savePodcastAction = actionClient
   .metadata({ name: "savePodcastAction" })
@@ -14,8 +15,13 @@ export const savePodcastAction = actionClient
     }),
   )
   .action(async ({ ctx, parsedInput }) => {
-    return await ctx.db
+    const res = await ctx.db
       .update(notebookPodcast)
       .set({ audioUrl: parsedInput.audioUrl })
-      .where(eq(notebookPodcast.notebookId, parsedInput.notebookId));
+      .where(eq(notebookPodcast.notebookId, parsedInput.notebookId))
+      .returning();
+
+    revalidatePath(`/notebook/${parsedInput.notebookId}`);
+
+    return res;
   });

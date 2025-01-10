@@ -26,13 +26,12 @@ export const pollJobStatusAction = actionClient
         .where(eq(parsingJobs.jobId, response.id))
         .execute();
 
-      ctx.db
+      await ctx.db
         .update(sources)
         .set({ processingStatus: "parsed" })
-        .where(eq(sources.id, parsedInput.sourceId))
-        .execute();
+        .where(eq(sources.id, parsedInput.sourceId));
 
-      revalidatePath(`/notebook/${parsedInput.notebookId}`);
+      revalidatePath(`/notebook/${parsedInput.notebookId}`, "layout");
 
       return response;
     }

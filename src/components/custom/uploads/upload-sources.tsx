@@ -32,7 +32,6 @@ export const UploadSources: React.FC<UploadSourcesProps> = (props) => {
   const [open, setOpen] = useState(false);
 
   const { execute, status } = useAction(submitSourcesForParsing, {
-    onSuccess: () => toast.success("Sources submitted for parsing"),
     onError: () => toast.error("Upload failed"),
   });
 

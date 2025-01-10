@@ -2,12 +2,14 @@
 
 import { z } from "zod";
 import { actionClient } from "./safe-action";
+import { revalidatePath } from "next/cache";
 
 export const pollPodcastAudio = actionClient
   .metadata({ name: "pollPodcastAudio" })
   .schema(
     z.object({
       pollUrl: z.string().url(),
+      notebookId: z.string().uuid(),
     }),
   )
   .action(async ({ parsedInput }) => {
@@ -33,6 +35,7 @@ export const pollPodcastAudio = actionClient
         throw new Error("Completed status but no audio URL provided");
       }
 
+      revalidatePath(`/notebook/${parsedInput.notebookId}`);
       return { status: "completed", audioUrl };
     }
 

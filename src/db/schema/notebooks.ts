@@ -33,6 +33,7 @@ export const notebooks = pgTable("notebooks", {
 
 export const notebooksRelations = relations(notebooks, (h) => ({
   sources: h.many(sources),
+  notebookPodcast: h.many(notebookPodcast),
 }));
 
 export const notebookPodcast = pgTable("notebook_podcast", {

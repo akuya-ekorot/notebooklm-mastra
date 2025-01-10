@@ -29,7 +29,7 @@ export const SourceItem: React.FC<SourceItemProps> = ({
   notebookId,
 }) => {
   useProcessSource({
-    jobId: parsingJobs?.[0].jobId,
+    jobId: parsingJobs?.[0]?.jobId,
     notebookId,
     processingStatus,
     sourceId: id,

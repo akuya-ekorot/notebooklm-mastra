@@ -5,6 +5,7 @@ import { actionClient } from "./safe-action";
 import { db } from "@/db";
 import { notebooks } from "@/db/schema/notebooks";
 import { revalidatePath } from "next/cache";
+import { eq } from "drizzle-orm";
 
 export const generateNotebookSummaries = actionClient
   .metadata({
@@ -16,6 +17,13 @@ export const generateNotebookSummaries = actionClient
     }),
   )
   .action(async ({ parsedInput, ctx }) => {
+    await db
+      .update(notebooks)
+      .set({ notebookStatus: "summarizing" })
+      .where(eq(notebooks.id, parsedInput.notebookId));
+
+    revalidatePath(`/notebook/${parsedInput.notebookId}`);
+
     const agent = ctx.mastra.getAgent("orchestrator");
 
     const summaries = await db.query.sources.findMany({
@@ -65,7 +73,10 @@ export const generateNotebookSummaries = actionClient
 
     const parsedResult = schema.parse(res.object);
 
-    await db.update(notebooks).set(parsedResult);
+    await db
+      .update(notebooks)
+      .set({ ...parsedResult, notebookStatus: "ready" })
+      .where(eq(notebooks.id, parsedInput.notebookId));
 
     revalidatePath(`/notebook/${parsedInput.notebookId}`);
   });

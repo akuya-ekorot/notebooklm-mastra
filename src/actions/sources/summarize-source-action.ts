@@ -31,7 +31,7 @@ export const summarizeSourceAction = actionClient
           },
         });
 
-      revalidatePath(`/notebook/${parsedInput.notebookId}`);
+      revalidatePath(`/notebook/${parsedInput.notebookId}`, "layout");
 
       return workflowResult.results;
     } catch (error) {
