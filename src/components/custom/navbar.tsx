@@ -1,31 +1,29 @@
-"use client";
+import { NotebookNameSkeleton } from "./notebook-name/notebook-name";
+import { NotebookNameWrapper } from "./notebook-name/notebook-name-wrapper";
 
+import { SidebarTrigger } from "../ui/sidebar";
+import { Suspense } from "react";
 import { cn } from "@/lib/utils";
-import { SidebarTrigger, useSidebar } from "../ui/sidebar";
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
-import { Button } from "../ui/button";
-import { NotebookName } from "./notebook-name";
 
 interface NavbarProps {
-  notebookName: string;
+  sessionId: string;
   notebookId: string;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ notebookName, notebookId }) => {
-  const { open } = useSidebar();
-
+export const Navbar: React.FC<NavbarProps> = async ({
+  sessionId,
+  notebookId,
+}) => {
   return (
     <nav
       className={cn(
         "border-b h-12 flex items-center gap-4 transition-all sticky top-0 w-full",
       )}
     >
-      <SidebarTrigger>
-        <Button size="icon">
-          {open ? <PanelLeftClose /> : <PanelLeftOpen />}
-        </Button>
-      </SidebarTrigger>
-      <NotebookName notebookId={notebookId} initialName={notebookName} />
+      <SidebarTrigger />
+      <Suspense fallback={<NotebookNameSkeleton />}>
+        <NotebookNameWrapper sessionId={sessionId} notebookId={notebookId} />
+      </Suspense>
     </nav>
   );
 };

@@ -3,6 +3,8 @@
 import { z } from "zod";
 import { actionClient } from "./safe-action";
 import { revalidatePath } from "next/cache";
+import { notebookPodcast } from "@/db/schema/notebooks";
+import { eq } from "drizzle-orm";
 
 export const pollPodcastAudio = actionClient
   .metadata({ name: "pollPodcastAudio" })
@@ -12,7 +14,7 @@ export const pollPodcastAudio = actionClient
       notebookId: z.string().uuid(),
     }),
   )
-  .action(async ({ parsedInput }) => {
+  .action(async ({ parsedInput, ctx }) => {
     const headers = {
       "X-USER-ID": process.env.PLAYDIALOG_USER_ID!,
       Authorization: `Bearer ${process.env.PLAYDIALOG_SECRET_KEY}`,
@@ -34,6 +36,12 @@ export const pollPodcastAudio = actionClient
       if (!audioUrl) {
         throw new Error("Completed status but no audio URL provided");
       }
+
+      await ctx.db
+        .update(notebookPodcast)
+        .set({ audioUrl })
+        .where(eq(notebookPodcast.notebookId, parsedInput.notebookId))
+        .returning();
 
       revalidatePath(`/notebook/${parsedInput.notebookId}`);
       return { status: "completed", audioUrl };

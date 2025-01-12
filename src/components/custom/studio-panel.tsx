@@ -10,7 +10,6 @@ import { TextStreamPart } from "ai";
 import { pollPodcastAudio } from "@/actions/poll-podcast-audio";
 import { submitAudioGenerationAction } from "@/actions/submit-audio-generation-action";
 import { cn } from "@/lib/utils";
-import { savePodcastAction } from "@/actions/save-podcast-action";
 import { STEPS, useSteps } from "@/hooks/use-steps";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { NotebookStatus } from "./example-card";
@@ -32,8 +31,6 @@ export const StudioPanel: React.FC<StudioPanelProps> = ({
   const [currentStepIndex, setCurrentStepIndex] = useState(-1);
   const [completedSteps, setCompletedSteps] = useState(new Set<string>());
 
-  const { execute: savePodcastUrl } = useAction(savePodcastAction);
-
   useSteps({
     audioUrl,
     completedSteps,
@@ -48,11 +45,6 @@ export const StudioPanel: React.FC<StudioPanelProps> = ({
     pollPodcastAudio,
     {
       onError: () => toast.error("Error polling podcast"),
-      onSuccess: ({ data }) => {
-        if (data?.audioUrl) {
-          savePodcastUrl({ notebookId, audioUrl: data.audioUrl });
-        }
-      },
     },
   );
 
