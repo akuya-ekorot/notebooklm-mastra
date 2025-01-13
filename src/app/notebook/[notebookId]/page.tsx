@@ -5,7 +5,10 @@ import {
   NotebookSummary,
   NotebookSummarySkeleton,
 } from "@/components/custom/notebook-summary/index";
-import { StudioPanel } from "@/components/custom/studio-panel";
+import {
+  StudioPanel,
+  StudioPanelSkeleton,
+} from "@/components/custom/studio-panel";
 
 interface NotebookPageProps {
   params: Promise<{ notebookId: string }>;
@@ -33,7 +36,7 @@ export default async function NotebookPage({
                 <NotebookSummary notebookId={notebookId} />
               </Suspense>
 
-              <Suspense fallback={null}>
+              <Suspense fallback={<StudioPanelSkeleton />}>
                 <StudioPanel notebookId={notebookId} />
               </Suspense>
             </>

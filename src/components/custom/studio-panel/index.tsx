@@ -48,3 +48,20 @@ export const StudioPanel: React.FC<StudioPanelProps> = async ({
     </Card>
   );
 };
+
+export const StudioPanelSkeleton: React.FC = () => {
+  return (
+    <Card className="w-full max-w-3xl">
+      <CardHeader>
+        <CardTitle>Studio</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <GeneratePodcast
+          audioUrl={undefined}
+          notebookId={""}
+          notebookStatus={"awaiting_source_summaries"}
+        />
+      </CardContent>
+    </Card>
+  );
+};
