@@ -10,7 +10,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useSidebar } from "@/components/ui/sidebar";
 import { Loader, Plus } from "lucide-react";
 import { type HookActionStatus, useAction } from "next-safe-action/hooks";
 import {
@@ -22,6 +21,7 @@ import {
 import { toast } from "sonner";
 import { FileUploader } from "../file-uploader";
 import { useSearchParams } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 type UploadSourcesProps =
   | {
@@ -90,7 +90,7 @@ const UploadSourcesHomeTrigger: React.FC<{
   return (
     <Button
       size="lg"
-      className="px-8 rounded-full w-36"
+      className={cn("px-8 rounded-full w-36")}
       onClick={() => props.onOpenChange((prev) => !prev)}
     >
       {props.status === "executing" ? (
@@ -110,15 +110,14 @@ const UploadSourcesHomeTrigger: React.FC<{
 const UploadSourcesSidebarTrigger: React.FC<{
   onOpenChange: Dispatch<SetStateAction<boolean>>;
 }> = ({ onOpenChange }) => {
-  const { open } = useSidebar();
-
   return (
     <Button
-      variant={open ? "outline" : "ghost"}
+      variant="ghost"
       onClick={() => onOpenChange((prev) => !prev)}
+      className="justify-start gap-3 w-full"
     >
       <Plus />
-      <span className={open ? "" : "sr-only"}>Add source</span>
+      <span className="truncate">Add source</span>
     </Button>
   );
 };

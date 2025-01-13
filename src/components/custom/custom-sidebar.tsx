@@ -1,10 +1,17 @@
-import { Sidebar, SidebarContent, SidebarRail } from "../ui/sidebar";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarRail,
+} from "../ui/sidebar";
 import { PropsWithChildren, Suspense } from "react";
 import {
   SidebarNotebooks,
   SidebarNotebooksSkeleton,
 } from "./sidebar-notebooks";
 import { CustomSidebarHeader } from "./custom-sidebar-header";
+import { UploadSources } from "./uploads/upload-sources";
 
 interface CustomSidebarProps {
   notebookId: string;
@@ -18,11 +25,23 @@ export const CustomSidebar: React.FC<PropsWithChildren<CustomSidebarProps>> = ({
   return (
     <Sidebar collapsible="icon">
       <CustomSidebarHeader sessionId={sessionId} />
+
       <hr />
+
       <SidebarContent className="p-2">
-        <Suspense fallback={<SidebarNotebooksSkeleton />}>
-          <SidebarNotebooks notebookId={notebookId} />
-        </Suspense>
+        <SidebarMenu className="">
+          <SidebarMenuItem>
+            <UploadSources variant="sidebar" notebookId={notebookId} />
+          </SidebarMenuItem>
+        </SidebarMenu>
+
+        <hr />
+
+        <SidebarMenu>
+          <Suspense fallback={<SidebarNotebooksSkeleton />}>
+            <SidebarNotebooks notebookId={notebookId} />
+          </Suspense>
+        </SidebarMenu>
       </SidebarContent>
       <SidebarRail />
     </Sidebar>

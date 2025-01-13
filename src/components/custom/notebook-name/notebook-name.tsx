@@ -94,5 +94,5 @@ export const NotebookNameForm: React.FC<NotebookNameProps> = ({
 };
 
 export const NotebookNameSkeleton: React.FC = () => (
-  <Skeleton className="h-6 w-20"></Skeleton>
+  <Skeleton className="h-6 w-40"></Skeleton>
 );

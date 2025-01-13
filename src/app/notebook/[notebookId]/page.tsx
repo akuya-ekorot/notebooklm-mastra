@@ -1,9 +1,11 @@
-import { NotebookSummarySection } from "@/components/custom/notebook-summary";
-import { StatusCard } from "@/components/custom/example-card";
-import { StudioPanel } from "@/components/custom/studio-panel";
-import { fetchNotebookWithSources } from "@/db/queries/notebooks";
 import { CustomSidebar } from "@/components/custom/custom-sidebar";
 import { Navbar } from "@/components/custom/navbar";
+import { Suspense } from "react";
+import {
+  NotebookSummary,
+  NotebookSummarySkeleton,
+} from "@/components/custom/notebook-summary/index";
+import { StudioPanel } from "@/components/custom/studio-panel";
 
 interface NotebookPageProps {
   params: Promise<{ notebookId: string }>;
@@ -19,13 +21,6 @@ export default async function NotebookPage({
 
   if (!sessionId) throw new Error("User error. Missing sessionId");
 
-  const notebookWithSources = await fetchNotebookWithSources(notebookId);
-  const sourcesStatus = notebookWithSources?.sources.map(
-    (s) => s.processingStatus,
-  );
-  const allSourcesSummarized =
-    sourcesStatus?.every((s) => s === "summarized") ?? false;
-
   return (
     <>
       <CustomSidebar notebookId={notebookId} sessionId={sessionId} />
@@ -34,26 +29,13 @@ export default async function NotebookPage({
         <main>
           <div className="w-full flex flex-col items-center justify-center h-[calc(100vh-3rem)] gap-8">
             <>
-              <NotebookSummarySection
-                notebookSummary={notebookWithSources}
-                sourcesSummarized={allSourcesSummarized}
-              />
+              <Suspense fallback={<NotebookSummarySkeleton />}>
+                <NotebookSummary notebookId={notebookId} />
+              </Suspense>
 
-              {notebookWithSources?.notebookStatus !== "ready" && (
-                <StatusCard
-                  sourcesStatus={sourcesStatus ?? []}
-                  notebookStatus={notebookWithSources?.notebookStatus}
-                />
-              )}
-
-              <StudioPanel
-                notebookId={notebookId}
-                audioUrl={
-                  notebookWithSources?.notebookPodcast.find((p) => !!p.audioUrl)
-                    ?.audioUrl ?? undefined
-                }
-                notebookStatus={notebookWithSources?.notebookStatus}
-              />
+              <Suspense fallback={null}>
+                <StudioPanel notebookId={notebookId} />
+              </Suspense>
             </>
           </div>
         </main>

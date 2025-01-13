@@ -22,8 +22,6 @@ export const generateNotebookSummaries = actionClient
       .set({ notebookStatus: "summarizing" })
       .where(eq(notebooks.id, parsedInput.notebookId));
 
-    revalidatePath(`/notebook/${parsedInput.notebookId}`);
-
     const agent = ctx.mastra.getAgent("orchestrator");
 
     const summaries = await db.query.sources.findMany({

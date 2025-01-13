@@ -54,3 +54,24 @@ export const fetchNotebookWithSources = async (notebookId: string) => {
     },
   });
 };
+
+export const fetchNotebookSummary = async (notebookId: string) => {
+  return await db.query.notebooks.findFirst({
+    where: (t, h) => h.eq(t.id, notebookId),
+    columns: {
+      emoji: true,
+      summary: true,
+      title: true,
+      notebookStatus: true,
+    },
+  });
+};
+
+export const fetchSourceSummariesStatus = async (notebookId: string) => {
+  return await db.query.sources.findMany({
+    where: (t, h) => h.eq(t.notebookId, notebookId),
+    columns: {
+      processingStatus: true,
+    },
+  });
+};
