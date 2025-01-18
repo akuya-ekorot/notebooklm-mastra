@@ -1,0 +1,1 @@
+ALTER TABLE "sources" ALTER COLUMN "processing_status" DROP NOT NULL;

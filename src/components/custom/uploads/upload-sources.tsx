@@ -1,6 +1,6 @@
 "use client";
 
-import { submitSourcesForParsing } from "@/actions/sources/submit-sources-action";
+import { submitSourcesAction } from "@/actions/sources/submit-sources-action";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -36,17 +36,58 @@ export const UploadSources: React.FC<UploadSourcesProps> = (props) => {
 
   const sessionId = searchParams.get("sessionId");
 
-  const { execute, status } = useAction(submitSourcesForParsing, {
+  const { execute, status } = useAction(submitSourcesAction, {
     onError: () => toast.error("Upload failed"),
+    onSuccess: ({ data }) => {
+      console.log({ data });
+    },
   });
 
-  const { execute: validateSources, status: validateSourcesStatus } = useAction(
-    validateSourcesAction,
-    {
-      onSuccess: ({ data }) => console.log({ data }),
-      onError: () => toast.error("Upload failed"),
+  const { execute: validateSources } = useAction(validateSourcesAction, {
+    onSuccess: ({ data }) => {
+      if (!sessionId) return;
+
+      if (!data?.ok) {
+        toast.message("Error in source validation", {
+          description: data?.reason,
+        });
+        return;
+      } else {
+        if (data?.successful?.length === 0) {
+          const reasons = data.failed?.map((r) => {
+            if (r.status === "rejected") return JSON.stringify(r.reason);
+
+            if (!r.value.isValid) {
+              return r.value.reason;
+            } else return ""; // TODO: Impossible state represented here need better type inference here.
+          });
+
+          toast.message("All sources failed validation.", {
+            description: reasons?.join("\n"),
+          });
+        }
+
+        const successfulSources =
+          data.successful
+            ?.filter((s) => s.status === "fulfilled")
+            .map((s) => s.value) ?? [];
+
+        const failedSources =
+          data.failed
+            ?.filter((s) => s.status === "fulfilled")
+            .map((s) => s.value) ?? [];
+
+        // submit successful sources for processing
+        // store all sources to the db, with their validation results for recovery later
+        execute({
+          sessionId,
+          sources: [...successfulSources, ...failedSources],
+        });
+      }
     },
-  );
+    onError: () =>
+      toast.error("Validation of sources failed due to an unexpected error"),
+  });
 
   const handleUpload = useCallback(
     async (files: File[]) => {
@@ -55,17 +96,16 @@ export const UploadSources: React.FC<UploadSourcesProps> = (props) => {
       if (files.length === 0) throw new Error("Upload at least one file");
 
       validateSources({ files });
-      return;
 
-      if (props.variant === "sidebar") {
-        execute({ files, sidebar: true, notebookId: props.notebookId });
-      } else {
-        execute({ files, sidebar: false, sessionId });
-      }
-
-      setOpen(false);
+      // if (props.variant === "sidebar") {
+      //   execute({ files, sidebar: true, notebookId: props.notebookId });
+      // } else {
+      //   execute({ files, sidebar: false, sessionId });
+      // }
+      //
+      // setOpen(false);
     },
-    [execute, props, sessionId, validateSources],
+    [sessionId, validateSources],
   );
 
   return (

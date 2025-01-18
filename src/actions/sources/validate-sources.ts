@@ -2,7 +2,25 @@
 
 import { z } from "zod";
 import { actionClient } from "../safe-action";
-import { PDFDocument } from "pdf-lib";
+import { validateFile } from "./utils";
+
+export type FileValidityResult = ValidFile | InvalidFile;
+
+type ValidFile = {
+  isValid: true;
+  isEncrypted: false;
+  size: number;
+  pageCount: number;
+  fileName: string;
+  file: File;
+};
+
+type InvalidFile = {
+  isValid: false;
+  reason: string;
+  fileName: string;
+  file: File;
+};
 
 export const validateSourcesAction = actionClient
   .metadata({ name: "validateSourcesAction" })
@@ -14,8 +32,9 @@ export const validateSourcesAction = actionClient
     }),
   )
   .action(async ({ parsedInput }) => {
+    // Validate individual sources
     const validityResults = await Promise.allSettled(
-      parsedInput.files.map((f) => processFile(f)),
+      parsedInput.files.map((f) => validateFile(f)),
     );
 
     const { pages, size } = (
@@ -26,7 +45,7 @@ export const validateSourcesAction = actionClient
         ) as PromiseFulfilledResult<ValidFile>[]
     ).reduce(
       (pv, cv) => ({
-        pages: pv.pages + cv.value.pages,
+        pages: pv.pages + cv.value.pageCount,
         size: pv.size + cv.value.size,
       }),
       {} as { pages: number; size: number },
@@ -46,6 +65,7 @@ export const validateSourcesAction = actionClient
       };
     }
 
+    // Returns list of sources that both passed and failed validation.
     return {
       ok: true,
       successful: validityResults.filter(
@@ -58,61 +78,3 @@ export const validateSourcesAction = actionClient
       ),
     };
   });
-
-type FileValidityResult = ValidFile | InvalidFile;
-type ValidFile = {
-  isValid: true;
-  isEncrypted: false;
-  size: number;
-  pages: number;
-};
-type InvalidFile = {
-  isValid: false;
-  reason: string;
-};
-
-const MAX_FILE_SIZE = 32 * 1024 * 1024;
-const MAX_PAGES = 100;
-
-const processFile = async (file: File): Promise<FileValidityResult> => {
-  if (file.type !== "application/pdf") {
-    return {
-      isValid: false,
-      reason: "File is not PDF",
-    };
-  }
-
-  if (file.size > MAX_FILE_SIZE) {
-    return {
-      isValid: false,
-      reason: `File size exceeds maximum limit of 32MB (current: ${(file.size / (1024 * 1024)).toFixed(2)}MB)`,
-    };
-  }
-  const arrayBuffer = await file.arrayBuffer();
-  const doc = await PDFDocument.load(arrayBuffer, {
-    updateMetadata: false,
-  });
-
-  if (doc.isEncrypted) {
-    return {
-      isValid: false,
-      reason: "File is password protected or encrypted",
-    };
-  }
-
-  const pageCount = doc.getPageCount();
-
-  if (pageCount > MAX_PAGES) {
-    return {
-      isValid: false,
-      reason: `File exceeds maximum page limit of ${MAX_PAGES} pages (current: ${pageCount} pages)`,
-    };
-  }
-
-  return {
-    isValid: true,
-    isEncrypted: false,
-    size: file.size,
-    pages: pageCount,
-  };
-};

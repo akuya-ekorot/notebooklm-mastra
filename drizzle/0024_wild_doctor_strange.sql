@@ -1,0 +1,1 @@
+ALTER TABLE "sources" ADD COLUMN "passed_validation" boolean DEFAULT false NOT NULL;

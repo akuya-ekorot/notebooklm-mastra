@@ -169,6 +169,27 @@
       "when": 1736501635318,
       "tag": "0023_brief_the_fallen",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1737181532164,
+      "tag": "0024_wild_doctor_strange",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1737185298256,
+      "tag": "0025_puzzling_molecule_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1737192051401,
+      "tag": "0026_hard_captain_stacy",
+      "breakpoints": true
     }
   ]
 }

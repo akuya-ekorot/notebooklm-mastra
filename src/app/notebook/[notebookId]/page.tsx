@@ -22,7 +22,7 @@ export default async function NotebookPage({
   const notebookId = (await params).notebookId;
   const sessionId = (await searchParams).sessionId;
 
-  if (!sessionId) throw new Error("User error. Missing sessionId");
+  if (!sessionId) return null;
 
   return (
     <>

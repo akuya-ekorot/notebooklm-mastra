@@ -1,4 +1,5 @@
 import {
+  boolean,
   index,
   pgEnum,
   pgTable,
@@ -34,9 +35,9 @@ export const sources = pgTable("sources", {
       onDelete: "cascade",
     })
     .notNull(),
-  processingStatus: processingStatus("processing_status")
-    .notNull()
-    .default("queued"),
+  processingStatus: processingStatus("processing_status"), // will only have a processing_status if passed_validation
+  passedValidation: boolean("passed_validation").notNull().default(false),
+  validationFailureReason: text("validation_failure_reason"),
   ...timestamps,
 });
 
