@@ -3,6 +3,7 @@ import { PostgresEngine } from "@mastra/engine";
 import { summarizeSource } from "./workflows";
 import { orchestrator } from "./agents/orchestrator";
 import { PgMemory } from "@mastra/memory";
+import { inputWorkflow } from "./workflows/input-workflow";
 
 const engine = new PostgresEngine({
   url: process.env.DB_URL!,
@@ -20,7 +21,7 @@ const logger = createLogger({
 
 export const mastra = new Mastra({
   agents: { orchestrator },
-  workflows: { summarizeSource },
+  workflows: { summarizeSource, inputWorkflow },
   memory,
   logger,
   engine,

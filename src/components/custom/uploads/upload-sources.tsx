@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { FileUploader } from "../file-uploader";
 import { useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { validateSourcesAction } from "@/actions/sources/validate-sources";
 
 type UploadSourcesProps =
   | {
@@ -39,11 +40,22 @@ export const UploadSources: React.FC<UploadSourcesProps> = (props) => {
     onError: () => toast.error("Upload failed"),
   });
 
+  const { execute: validateSources, status: validateSourcesStatus } = useAction(
+    validateSourcesAction,
+    {
+      onSuccess: ({ data }) => console.log({ data }),
+      onError: () => toast.error("Upload failed"),
+    },
+  );
+
   const handleUpload = useCallback(
     async (files: File[]) => {
       if (!sessionId) return;
 
       if (files.length === 0) throw new Error("Upload at least one file");
+
+      validateSources({ files });
+      return;
 
       if (props.variant === "sidebar") {
         execute({ files, sidebar: true, notebookId: props.notebookId });
@@ -53,7 +65,7 @@ export const UploadSources: React.FC<UploadSourcesProps> = (props) => {
 
       setOpen(false);
     },
-    [execute, props, sessionId],
+    [execute, props, sessionId, validateSources],
   );
 
   return (
